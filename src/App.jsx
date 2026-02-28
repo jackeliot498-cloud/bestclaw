@@ -524,8 +524,10 @@ const Guides = ({ locale }) => {
     <div className="min-h-screen">
       <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
         <Navigation locale={locale} />
-        <section className="rounded-2xl neon-border bg-black/30 p-8">
-          <h1 className="text-3xl font-semibold">{t.guidesTitle}</h1>
+        <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/30 p-8">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-neonBlue/20 blur-3xl float-slow" />
+          <div className="pointer-events-none absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-neonPink/20 blur-3xl float-fast" />
+          <h1 className="display-font text-3xl font-semibold">{t.guidesTitle}</h1>
           <p className="mt-2 text-slate-300">
             {locale === 'en'
               ? 'Playbooks, comparisons, and onboarding guides for every agent workflow.'
@@ -537,7 +539,7 @@ const Guides = ({ locale }) => {
       <main className="mx-auto max-w-6xl px-6 pb-24">
         <section className="grid gap-4 md:grid-cols-3">
           {t.guides.map((guide) => (
-            <article key={guide.title} className="rounded-xl border border-white/10 bg-white/5 p-5">
+            <article key={guide.title} className="glass-panel rounded-2xl p-5">
               <p className="text-xs uppercase tracking-wider text-neonGreen">{guide.read}</p>
               <h3 className="mt-2 text-lg font-semibold">{guide.title}</h3>
               <p className="mt-2 text-sm text-slate-300">{guide.desc}</p>
@@ -559,8 +561,10 @@ const Directory = ({ locale }) => {
     <div className="min-h-screen">
       <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
         <Navigation locale={locale} />
-        <section className="rounded-2xl neon-border bg-black/30 p-8">
-          <h1 className="text-3xl font-semibold">{t.directoryTitle}</h1>
+        <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/30 p-8">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-neonBlue/20 blur-3xl float-slow" />
+          <div className="pointer-events-none absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-neonPink/20 blur-3xl float-fast" />
+          <h1 className="display-font text-3xl font-semibold">{t.directoryTitle}</h1>
           <p className="mt-2 text-slate-300">{locale === 'en' ? 'Browse agents by use case, pricing, and platform.' : '按用途、价格与平台筛选 Agent。'}</p>
         </section>
       </header>
@@ -576,7 +580,7 @@ const Directory = ({ locale }) => {
           </div>
           <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {t.directoryAgents.map((agent) => (
-              <article key={agent.name} className="rounded-2xl neon-border bg-black/35 p-5 hover:-translate-y-1 hover:shadow-neon transition">
+              <article key={agent.name} className="glass-panel rounded-2xl p-5 hover:-translate-y-1 hover:shadow-neon transition">
                 <p className="text-xs uppercase tracking-wider text-neonPink">{agent.tag}</p>
                 <h3 className="mt-2 text-xl font-semibold">{agent.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">
@@ -608,8 +612,10 @@ const AgentDetail = ({ locale }) => {
     <div className="min-h-screen">
       <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
         <Navigation locale={locale} />
-        <section className="rounded-2xl neon-border bg-black/30 p-8">
-          <h1 className="text-3xl font-semibold">{agent.name}</h1>
+        <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/30 p-8">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-neonBlue/20 blur-3xl float-slow" />
+          <div className="pointer-events-none absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-neonPink/20 blur-3xl float-fast" />
+          <h1 className="display-font text-3xl font-semibold">{agent.name}</h1>
           <p className="mt-2 text-slate-300">{agent.summary}</p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             <span className="rounded-full border border-neonBlue/40 bg-neonBlue/10 px-3 py-1 text-neonBlue">
@@ -624,7 +630,7 @@ const AgentDetail = ({ locale }) => {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 pb-24">
-        <section className="rounded-2xl neon-border bg-black/30 p-8">
+        <section className="glass-panel rounded-[28px] p-8">
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <h2 className="section-title">{t.agentDetailTitle}</h2>
