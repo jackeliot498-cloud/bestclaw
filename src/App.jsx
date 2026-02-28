@@ -13,6 +13,11 @@ const content = {
       cta: 'Search',
       trending: 'Trending: Cursor / Perplexity / Notion AI / Zapier AI',
     },
+    stats: [
+      { value: '120+', label: 'Agents indexed' },
+      { value: '6', label: 'Core categories' },
+      { value: '24h', label: 'Weekly refresh' },
+    ],
     featured: 'Featured This Week',
     categoriesTitle: 'Categories',
     latestTitle: 'Newest Agents',
@@ -154,6 +159,11 @@ const content = {
       cta: '开始搜索',
       trending: '热门：Cursor / Perplexity / Notion AI / Zapier AI',
     },
+    stats: [
+      { value: '120+', label: '已收录 Agent' },
+      { value: '6', label: '核心分类' },
+      { value: '24h', label: '每周更新' },
+    ],
     featured: '本周精选',
     categoriesTitle: '分类入口',
     latestTitle: '最新收录',
@@ -353,39 +363,61 @@ const Home = ({ locale }) => {
       <header className="mx-auto max-w-6xl px-6 pb-16 pt-8 md:pt-12">
         <Navigation locale={locale} />
 
-        <section className="grid gap-10 md:grid-cols-2 md:items-center" id="home">
-          <div>
-            <p className="mb-3 inline-block rounded-full border border-neonPink/50 bg-neonPink/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neonPink">
-              {t.hero.badge}
-            </p>
-            <h1 className="text-4xl font-semibold leading-tight md:text-6xl">
-              {t.hero.title} <span className="text-neonBlue">{t.hero.highlight}</span>{' '}
-              {t.hero.titleSuffix}
-            </h1>
-            <p className="mt-5 max-w-xl text-slate-300">{t.hero.subtitle}</p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <input
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-400"
-                placeholder={t.hero.placeholder}
-              />
-              <button className="rounded-lg bg-neonGreen px-5 py-3 font-semibold text-black hover:bg-neonGreen/90">
-                {t.hero.cta}
-              </button>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-2 text-xs text-slate-400">{t.hero.trending}</div>
-          </div>
-          <div className="rounded-2xl neon-border bg-black/30 p-6 shadow-neon">
-            <p className="text-sm uppercase tracking-wider text-neonBlue">{t.featured}</p>
-            <div className="mt-4 space-y-4">
-              {t.featuredAgents.map((agent) => (
-                <article key={agent.name} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">{agent.name}</h3>
-                    <span className="text-xs text-neonPink">{agent.tag}</span>
+        <section
+          className="relative overflow-hidden rounded-[32px] border border-white/10 bg-black/30 p-10 md:p-14"
+          id="home"
+        >
+          <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-neonBlue/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-10 h-52 w-52 rounded-full bg-neonPink/20 blur-3xl" />
+          <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-slate-200">
+                <span className="h-2 w-2 rounded-full bg-neonGreen" />
+                {t.hero.badge}
+              </p>
+              <h1 className="display-font text-4xl font-semibold leading-tight md:text-6xl">
+                {t.hero.title} <span className="text-neonBlue">{t.hero.highlight}</span>{' '}
+                {t.hero.titleSuffix}
+              </h1>
+              <p className="mt-6 max-w-xl text-base text-slate-300 md:text-lg">{t.hero.subtitle}</p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <input
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-400"
+                  placeholder={t.hero.placeholder}
+                />
+                <button className="rounded-xl bg-neonGreen px-6 py-3 font-semibold text-black hover:bg-neonGreen/90">
+                  {t.hero.cta}
+                </button>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs text-slate-400">{t.hero.trending}</div>
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {t.stats.map((item) => (
+                  <div key={item.label} className="glass-panel rounded-2xl px-4 py-4">
+                    <p className="text-2xl font-semibold text-white">{item.value}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">{item.label}</p>
                   </div>
-                  <p className="mt-2 text-sm text-slate-300">{agent.summary}</p>
-                </article>
-              ))}
+                ))}
+              </div>
+            </div>
+            <div className="glass-panel rounded-[28px] p-6">
+              <p className="text-sm uppercase tracking-wider text-neonBlue">{t.featured}</p>
+              <div className="mt-5 space-y-4">
+                {t.featuredAgents.map((agent) => (
+                  <article key={agent.name} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">{agent.name}</h3>
+                      <span className="text-xs text-neonPink">{agent.tag}</span>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-300">{agent.summary}</p>
+                  </article>
+                ))}
+              </div>
+              <Link
+                to={buildPath('/directory', locale)}
+                className="mt-6 inline-flex text-sm text-neonBlue hover:text-neonBlue/80"
+              >
+                {locale === 'en' ? 'Browse directory →' : '进入目录 →'}
+              </Link>
             </div>
           </div>
         </section>
@@ -396,7 +428,7 @@ const Home = ({ locale }) => {
           <h2 className="section-title">{t.categoriesTitle}</h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {t.categories.map((category) => (
-              <article key={category.name} className="rounded-2xl neon-border bg-black/35 p-5">
+              <article key={category.name} className="glass-panel rounded-2xl p-5">
                 <h3 className="text-lg font-semibold">{category.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">
                   {category.count} {locale === 'en' ? 'recommended agents' : '个推荐 Agent'}
@@ -410,7 +442,7 @@ const Home = ({ locale }) => {
           <h2 className="section-title">{t.latestTitle}</h2>
           <div className="mt-6 grid gap-5 md:grid-cols-3">
             {t.latestAgents.map((agent) => (
-              <article key={agent.name} className="rounded-2xl neon-border bg-black/35 p-5">
+              <article key={agent.name} className="glass-panel rounded-2xl p-5">
                 <p className="text-xs uppercase tracking-wider text-neonPink">{agent.tag}</p>
                 <h3 className="mt-2 text-xl font-semibold">{agent.name}</h3>
                 <p className="mt-3 text-slate-300">{agent.summary}</p>
@@ -423,7 +455,7 @@ const Home = ({ locale }) => {
           <h2 className="section-title">{t.guidesTitle}</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {t.guides.map((guide) => (
-              <article key={guide.title} className="rounded-xl border border-white/10 bg-white/5 p-5">
+              <article key={guide.title} className="glass-panel rounded-2xl p-5">
                 <p className="text-xs uppercase tracking-wider text-neonGreen">{guide.read}</p>
                 <h3 className="mt-2 text-lg font-semibold">{guide.title}</h3>
                 <p className="mt-2 text-sm text-slate-300">{guide.desc}</p>
@@ -438,7 +470,7 @@ const Home = ({ locale }) => {
           </Link>
         </section>
 
-        <section id="submit" className="rounded-2xl neon-border bg-gradient-to-r from-cyan-500/15 via-fuchsia-500/10 to-emerald-500/15 p-8">
+        <section id="submit" className="glass-panel rounded-[28px] p-8">
           <h2 className="text-3xl font-semibold">{t.submitTitle}</h2>
           <p className="mt-3 max-w-2xl text-slate-300">{t.submitDesc}</p>
           <form className="mt-6 grid gap-4 md:grid-cols-2">
