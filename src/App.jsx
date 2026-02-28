@@ -366,7 +366,7 @@ const AuthPanel = ({ locale }) => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative z-50">
       {session ? (
         <button
           className="rounded-full border border-white/10 px-4 py-2 text-xs text-slate-300 hover:text-white"
@@ -383,7 +383,7 @@ const AuthPanel = ({ locale }) => {
         </button>
       )}
       {open && (
-        <div className="absolute right-0 mt-3 w-80 rounded-2xl border border-white/10 bg-black/70 p-4 backdrop-blur">
+        <div className="absolute right-0 top-full z-50 mt-3 w-80 rounded-2xl border border-white/10 bg-black/80 p-4 shadow-2xl backdrop-blur">
           {!session && (
             <form className="grid gap-3" onSubmit={handleAuth}>
               <div className="grid grid-cols-2 gap-2">
