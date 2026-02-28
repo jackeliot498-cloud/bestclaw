@@ -534,7 +534,18 @@ const Home = ({ locale }) => {
 }
 
 const SubmitAgent = ({ locale, t, showTitle = true }) => {
-  const [form, setForm] = useState({ name: '', website: '', summary: '', useCase: '', assets: '' })
+  const [form, setForm] = useState({
+    name: '',
+    website: '',
+    summary: '',
+    useCase: '',
+    logoUrl: '',
+    contactEmail: '',
+    category: 'writing',
+    pricing: 'freemium',
+    openSource: false,
+    local: false,
+  })
   const [status, setStatus] = useState('')
 
   const handleChange = (field) => (event) => {
@@ -553,6 +564,12 @@ const SubmitAgent = ({ locale, t, showTitle = true }) => {
       website: form.website,
       summary: form.summary,
       use_case: form.useCase,
+      category: form.category,
+      pricing: form.pricing,
+      is_open_source: form.openSource,
+      is_local: form.local,
+      logo_url: form.logoUrl,
+      contact_email: form.contactEmail,
     })
 
     if (error) {
@@ -560,7 +577,18 @@ const SubmitAgent = ({ locale, t, showTitle = true }) => {
       return
     }
 
-    setForm({ name: '', website: '', summary: '', useCase: '', assets: '' })
+    setForm({
+      name: '',
+      website: '',
+      summary: '',
+      useCase: '',
+      logoUrl: '',
+      contactEmail: '',
+      category: 'writing',
+      pricing: 'freemium',
+      openSource: false,
+      local: false,
+    })
     setStatus(locale === 'en' ? 'Submitted! We will review soon.' : '已提交，稍后审核。')
   }
 
@@ -572,42 +600,116 @@ const SubmitAgent = ({ locale, t, showTitle = true }) => {
           <p className="mt-3 max-w-2xl text-slate-300">{t.submitDesc}</p>
         </>
       )}
-      <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
-        <input
-          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
-          placeholder={t.inputs.name}
-          value={form.name}
-          onChange={handleChange('name')}
-          required
-        />
-        <input
-          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
-          placeholder={t.inputs.link}
-          value={form.website}
-          onChange={handleChange('website')}
-          required
-        />
-        <input
-          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white md:col-span-2"
-          placeholder={t.inputs.tagline}
-          value={form.summary}
-          onChange={handleChange('summary')}
-        />
-        <input
-          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
-          placeholder={t.inputs.useCase}
-          value={form.useCase}
-          onChange={handleChange('useCase')}
-        />
-        <input
-          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
-          placeholder={t.inputs.assets}
-          value={form.assets}
-          onChange={handleChange('assets')}
-        />
-        <button className="rounded-lg bg-neonBlue px-6 py-3 font-semibold text-black hover:bg-neonBlue/90 md:col-span-2">
-          {t.submitButton}
-        </button>
+      <form className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]" onSubmit={handleSubmit}>
+        <div className="grid gap-4">
+          <div>
+            <label className="text-xs uppercase tracking-[0.2em] text-slate-400">{locale === 'en' ? 'Basic info' : '基础信息'}</label>
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              <input
+                className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+                placeholder={t.inputs.name}
+                value={form.name}
+                onChange={handleChange('name')}
+                required
+              />
+              <input
+                className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+                placeholder={t.inputs.link}
+                value={form.website}
+                onChange={handleChange('website')}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs uppercase tracking-[0.2em] text-slate-400">{locale === 'en' ? 'What does it do?' : '功能描述'}</label>
+            <textarea
+              className="mt-3 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+              rows={4}
+              placeholder={t.inputs.tagline}
+              value={form.summary}
+              onChange={handleChange('summary')}
+            />
+            <input
+              className="mt-3 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+              placeholder={t.inputs.useCase}
+              value={form.useCase}
+              onChange={handleChange('useCase')}
+            />
+          </div>
+
+          <div>
+            <label className="text-xs uppercase tracking-[0.2em] text-slate-400">{locale === 'en' ? 'Logo & contact' : 'Logo 与联系方式'}</label>
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              <input
+                className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+                placeholder={locale === 'en' ? 'Logo URL (optional)' : 'Logo 链接（可选）'}
+                value={form.logoUrl}
+                onChange={handleChange('logoUrl')}
+              />
+              <input
+                className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+                placeholder={locale === 'en' ? 'Contact email (optional)' : '联系邮箱（可选）'}
+                value={form.contactEmail}
+                onChange={handleChange('contactEmail')}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-panel rounded-2xl p-6">
+          <label className="text-xs uppercase tracking-[0.2em] text-slate-400">{locale === 'en' ? 'Classification' : '分类与定价'}</label>
+          <div className="mt-4 grid gap-4">
+            <div>
+              <p className="text-sm text-slate-300">{locale === 'en' ? 'Category' : '分类'}</p>
+              <select
+                className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                value={form.category}
+                onChange={handleChange('category')}
+              >
+                <option value="writing">{locale === 'en' ? 'Writing' : '写作'}</option>
+                <option value="engineering">{locale === 'en' ? 'Engineering' : '编程'}</option>
+                <option value="research">{locale === 'en' ? 'Research' : '研究'}</option>
+                <option value="design">{locale === 'en' ? 'Design' : '设计'}</option>
+                <option value="automation">{locale === 'en' ? 'Automation' : '自动化'}</option>
+                <option value="support">{locale === 'en' ? 'Support' : '客服'}</option>
+              </select>
+            </div>
+            <div>
+              <p className="text-sm text-slate-300">{locale === 'en' ? 'Pricing' : '定价'}</p>
+              <select
+                className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                value={form.pricing}
+                onChange={handleChange('pricing')}
+              >
+                <option value="free">{locale === 'en' ? 'Free' : '免费'}</option>
+                <option value="freemium">{locale === 'en' ? 'Freemium' : '免费+付费'}</option>
+                <option value="paid">{locale === 'en' ? 'Paid' : '付费'}</option>
+                <option value="custom">{locale === 'en' ? 'Custom' : '定制'}</option>
+              </select>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <label className="flex items-center gap-2 text-sm text-slate-300">
+                <input type="checkbox" checked={form.openSource} onChange={(e) => setForm((prev) => ({ ...prev, openSource: e.target.checked }))} />
+                {locale === 'en' ? 'Open source' : '开源'}
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-300">
+                <input type="checkbox" checked={form.local} onChange={(e) => setForm((prev) => ({ ...prev, local: e.target.checked }))} />
+                {locale === 'en' ? 'Local deploy' : '本地部署'}
+              </label>
+            </div>
+          </div>
+
+          <button className="mt-6 w-full rounded-lg bg-neonBlue px-6 py-3 font-semibold text-black hover:bg-neonBlue/90">
+            {t.submitButton}
+          </button>
+          <p className="mt-3 text-xs text-slate-400">
+            {locale === 'en'
+              ? 'We review every submission. You will receive status updates in admin.'
+              : '每条提交都会审核，可在后台查看状态。'}
+          </p>
+        </div>
       </form>
       {status && <p className="mt-3 text-sm text-slate-300">{status}</p>}
     </section>
