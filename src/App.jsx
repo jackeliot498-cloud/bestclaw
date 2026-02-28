@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { fetchAgents, fetchAgentDetail } from './lib/agents'
 import { fetchGuides } from './lib/guides'
 import { fetchReviewsSummary, submitReview } from './lib/reviews'
@@ -382,14 +383,15 @@ const AuthPanel = ({ locale }) => {
           {locale === 'en' ? 'Sign in' : '登录/注册'}
         </button>
       )}
-      {open && (
-        <div className="fixed inset-0 z-[999] bg-black/40" onClick={() => setOpen(false)}>
-          <div
-            className="absolute left-1/2 top-1/2 w-[360px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/10 bg-black/90 p-5 shadow-2xl backdrop-blur"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {!session && (
-            <form className="grid gap-3" onSubmit={handleAuth}>
+      {open && typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[999] bg-black/40" onClick={() => setOpen(false)}>
+            <div
+              className="absolute left-1/2 top-1/2 w-[360px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/10 bg-black/90 p-5 shadow-2xl backdrop-blur"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {!session && (
+                <form className="grid gap-3" onSubmit={handleAuth}>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -430,17 +432,18 @@ const AuthPanel = ({ locale }) => {
               {status && <p className="text-xs text-slate-300">{status}</p>}
             </form>
           )}
-          {session && (
-            <div className="grid gap-3 text-xs text-slate-300">
-              <div>{session.user.email}</div>
-              <button className="rounded-md border border-white/10 px-3 py-2 text-xs" onClick={handleLogout}>
-                {locale === 'en' ? 'Sign out' : '退出登录'}
-              </button>
+              {session && (
+                <div className="grid gap-3 text-xs text-slate-300">
+                  <div>{session.user.email}</div>
+                  <button className="rounded-md border border-white/10 px-3 py-2 text-xs" onClick={handleLogout}>
+                    {locale === 'en' ? 'Sign out' : '退出登录'}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   )
 }
