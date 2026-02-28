@@ -524,25 +524,86 @@ const Home = ({ locale }) => {
           </Link>
         </section>
 
-        <section id="submit" className="glass-panel rounded-[28px] p-8">
-          <h2 className="text-3xl font-semibold">{t.submitTitle}</h2>
-          <p className="mt-3 max-w-2xl text-slate-300">{t.submitDesc}</p>
-          <form className="mt-6 grid gap-4 md:grid-cols-2">
-            <input className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white" placeholder={t.inputs.name} />
-            <input className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white" placeholder={t.inputs.link} />
-            <input
-              className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white md:col-span-2"
-              placeholder={t.inputs.tagline}
-            />
-            <input className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white" placeholder={t.inputs.useCase} />
-            <input className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white" placeholder={t.inputs.assets} />
-            <button className="rounded-lg bg-neonBlue px-6 py-3 font-semibold text-black hover:bg-neonBlue/90 md:col-span-2">
-              {t.submitButton}
-            </button>
-          </form>
-        </section>
+        <SubmitAgent locale={locale} t={t} />
       </main>
     </div>
+  )
+}
+
+const SubmitAgent = ({ locale, t }) => {
+  const [form, setForm] = useState({ name: '', website: '', summary: '', useCase: '', assets: '' })
+  const [status, setStatus] = useState('')
+
+  const handleChange = (field) => (event) => {
+    setForm((prev) => ({ ...prev, [field]: event.target.value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setStatus('')
+    const { data: session } = await supabase.auth.getSession()
+    const userId = session?.session?.user?.id || null
+
+    const { error } = await supabase.from('submissions').insert({
+      user_id: userId,
+      name: form.name,
+      website: form.website,
+      summary: form.summary,
+      use_case: form.useCase,
+    })
+
+    if (error) {
+      setStatus(locale === 'en' ? 'Submit failed. Try again.' : '提交失败，请稍后再试。')
+      return
+    }
+
+    setForm({ name: '', website: '', summary: '', useCase: '', assets: '' })
+    setStatus(locale === 'en' ? 'Submitted! We will review soon.' : '已提交，稍后审核。')
+  }
+
+  return (
+    <section id="submit" className="glass-panel rounded-[28px] p-8">
+      <h2 className="text-3xl font-semibold">{t.submitTitle}</h2>
+      <p className="mt-3 max-w-2xl text-slate-300">{t.submitDesc}</p>
+      <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
+        <input
+          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+          placeholder={t.inputs.name}
+          value={form.name}
+          onChange={handleChange('name')}
+          required
+        />
+        <input
+          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+          placeholder={t.inputs.link}
+          value={form.website}
+          onChange={handleChange('website')}
+          required
+        />
+        <input
+          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white md:col-span-2"
+          placeholder={t.inputs.tagline}
+          value={form.summary}
+          onChange={handleChange('summary')}
+        />
+        <input
+          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+          placeholder={t.inputs.useCase}
+          value={form.useCase}
+          onChange={handleChange('useCase')}
+        />
+        <input
+          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
+          placeholder={t.inputs.assets}
+          value={form.assets}
+          onChange={handleChange('assets')}
+        />
+        <button className="rounded-lg bg-neonBlue px-6 py-3 font-semibold text-black hover:bg-neonBlue/90 md:col-span-2">
+          {t.submitButton}
+        </button>
+      </form>
+      {status && <p className="mt-3 text-sm text-slate-300">{status}</p>}
+    </section>
   )
 }
 
