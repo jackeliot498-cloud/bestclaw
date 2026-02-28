@@ -383,8 +383,11 @@ const AuthPanel = ({ locale }) => {
         </button>
       )}
       {open && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40" onClick={() => setOpen(false)}>
-          <div className="relative w-[360px] max-w-[90vw] rounded-2xl border border-white/10 bg-black/90 p-5 shadow-2xl backdrop-blur" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[999] bg-black/40" onClick={() => setOpen(false)}>
+          <div
+            className="absolute left-1/2 top-1/2 w-[360px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/10 bg-black/90 p-5 shadow-2xl backdrop-blur"
+            onClick={(e) => e.stopPropagation()}
+          >
             {!session && (
             <form className="grid gap-3" onSubmit={handleAuth}>
               <div className="grid grid-cols-2 gap-2">
