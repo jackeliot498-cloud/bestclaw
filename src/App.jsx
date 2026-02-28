@@ -330,6 +330,109 @@ const LanguageSwitch = ({ locale }) => (
   </a>
 )
 
+const AuthPanel = ({ locale }) => {
+  const [open, setOpen] = useState(false)
+  const [mode, setMode] = useState('signin')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [session, setSession] = useState(null)
+  const [status, setStatus] = useState('')
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data?.session || null))
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession)
+    })
+    return () => listener.subscription.unsubscribe()
+  }, [])
+
+  const handleAuth = async (event) => {
+    event.preventDefault()
+    setStatus('')
+    if (mode === 'signup') {
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) return setStatus(error.message)
+      setStatus(locale === 'en' ? 'Check your email to confirm.' : '请查收邮箱完成验证。')
+      return
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return setStatus(error.message)
+    setOpen(false)
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setOpen(false)
+  }
+
+  return (
+    <div className="relative">
+      {session ? (
+        <button
+          className="rounded-full border border-white/10 px-4 py-2 text-xs text-slate-300 hover:text-white"
+          onClick={() => setOpen((prev) => !prev)}
+        >
+          {session.user.email}
+        </button>
+      ) : (
+        <button
+          className="rounded-full border border-white/10 px-4 py-2 text-xs text-slate-300 hover:text-white"
+          onClick={() => setOpen((prev) => !prev)}
+        >
+          {locale === 'en' ? 'Sign in' : '登录/注册'}
+        </button>
+      )}
+      {open && (
+        <div className="absolute right-0 mt-3 w-72 rounded-2xl border border-white/10 bg-black/70 p-4 backdrop-blur">
+          {!session && (
+            <form className="grid gap-3" onSubmit={handleAuth}>
+              <input
+                className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                type="email"
+                placeholder={locale === 'en' ? 'Email' : '邮箱'}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+              <input
+                className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                type="password"
+                placeholder={locale === 'en' ? 'Password' : '密码'}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+              <button className="rounded-md bg-neonBlue px-3 py-2 text-sm font-semibold text-black">
+                {mode === 'signup' ? (locale === 'en' ? 'Sign up' : '注册') : locale === 'en' ? 'Sign in' : '登录'}
+              </button>
+              <button
+                type="button"
+                className="text-xs text-slate-300"
+                onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}
+              >
+                {mode === 'signup'
+                  ? locale === 'en'
+                    ? 'Have an account? Sign in'
+                    : '已有账号？登录'
+                  : locale === 'en'
+                    ? 'No account? Sign up'
+                    : '没有账号？注册'}
+              </button>
+              {status && <p className="text-xs text-slate-300">{status}</p>}
+            </form>
+          )}
+          {session && (
+            <div className="grid gap-3 text-xs text-slate-300">
+              <div>{session.user.email}</div>
+              <button className="rounded-md border border-white/10 px-3 py-2 text-xs" onClick={handleLogout}>
+                {locale === 'en' ? 'Sign out' : '退出登录'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const Navigation = ({ locale }) => {
   const t = content[locale] || content.en
   const navLinks = [
@@ -353,6 +456,7 @@ const Navigation = ({ locale }) => {
       </div>
       <div className="flex items-center gap-3">
         <LanguageSwitch locale={locale} />
+        <AuthPanel locale={locale} />
         <Link
           to={buildPath('/submit', locale)}
           className="rounded-full bg-neonBlue/90 px-4 py-2 text-sm font-semibold text-black hover:bg-neonBlue"
