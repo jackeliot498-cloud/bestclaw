@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAgents, fetchAgentDetail } from './lib/agents'
 import { fetchGuides } from './lib/guides'
+import { fetchReviewsSummary, submitReview } from './lib/reviews'
+import { supabase } from './lib/supabase'
 
 const content = {
   en: {
@@ -660,12 +662,28 @@ const AgentDetail = ({ locale }) => {
   const t = content[locale] || content.en
   const { slug } = useParams()
   const [agent, setAgent] = useState(getAgentBySlug(locale, slug))
+  const [reviews, setReviews] = useState({ avg: 0, total: 0 })
+  const [rating, setRating] = useState(5)
+  const [comment, setComment] = useState('')
+  const [session, setSession] = useState(null)
+  const [status, setStatus] = useState('')
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data?.session || null))
+  }, [])
 
   useEffect(() => {
     let alive = true
     fetchAgentDetail({ slug, locale })
       .then((data) => {
         if (alive && data) setAgent(data)
+        if (data?.id) {
+          fetchReviewsSummary({ agentId: data.id })
+            .then((summary) => {
+              if (alive) setReviews(summary)
+            })
+            .catch(() => null)
+        }
       })
       .catch(() => null)
 
@@ -673,6 +691,24 @@ const AgentDetail = ({ locale }) => {
       alive = false
     }
   }, [slug, locale])
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setStatus('')
+    if (!session) {
+      setStatus(locale === 'en' ? 'Please sign in to rate.' : '请先登录后评分。')
+      return
+    }
+    try {
+      await submitReview({ agentId: agent.id, rating: Number(rating), comment })
+      const summary = await fetchReviewsSummary({ agentId: agent.id })
+      setReviews(summary)
+      setComment('')
+      setStatus(locale === 'en' ? 'Thanks for your review!' : '感谢你的评分！')
+    } catch (err) {
+      setStatus(locale === 'en' ? 'Failed to submit review.' : '提交失败，请稍后重试。')
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -700,6 +736,12 @@ const AgentDetail = ({ locale }) => {
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <h2 className="section-title">{t.agentDetailTitle}</h2>
+              <div className="mt-4 flex items-center gap-3 text-sm text-slate-300">
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                  {reviews.avg ? `${reviews.avg} / 5` : locale === 'en' ? 'No ratings yet' : '暂无评分'}
+                </span>
+                <span>{locale === 'en' ? `${reviews.total} reviews` : `${reviews.total} 条评分`}</span>
+              </div>
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 {t.detail.blocks.map((item) => (
                   <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -710,6 +752,36 @@ const AgentDetail = ({ locale }) => {
                   </div>
                 ))}
               </div>
+              <form className="mt-6 rounded-xl border border-white/10 bg-white/5 p-5" onSubmit={handleSubmit}>
+                <h4 className="font-semibold">{locale === 'en' ? 'Rate this agent' : '评分'}</h4>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <label className="text-sm text-slate-300">
+                    {locale === 'en' ? 'Rating' : '评分'}
+                  </label>
+                  <select
+                    className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                    value={rating}
+                    onChange={(event) => setRating(event.target.value)}
+                  >
+                    {[5, 4, 3, 2, 1].map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <textarea
+                  className="mt-3 w-full rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                  rows={3}
+                  placeholder={locale === 'en' ? 'Share your experience (optional)' : '分享你的使用体验（可选）'}
+                  value={comment}
+                  onChange={(event) => setComment(event.target.value)}
+                />
+                <button className="mt-3 rounded-lg bg-neonBlue px-4 py-2 text-sm font-semibold text-black hover:bg-neonBlue/90">
+                  {locale === 'en' ? 'Submit review' : '提交评分'}
+                </button>
+                {status && <p className="mt-2 text-xs text-slate-300">{status}</p>}
+              </form>
             </div>
             <div className="rounded-xl border border-white/10 bg-white/5 p-5">
               <h4 className="font-semibold">{t.quickStart}</h4>
