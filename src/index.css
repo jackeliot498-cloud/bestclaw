@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-obsidian text-slate-100 antialiased;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(0, 245, 255, 0.14), transparent 30%),
+    radial-gradient(circle at 80% 0%, rgba(255, 43, 214, 0.14), transparent 32%),
+    radial-gradient(circle at 50% 80%, rgba(57, 255, 136, 0.12), transparent 38%);
+}
+
+.neon-border {
+  border: 1px solid rgba(0, 245, 255, 0.35);
+  box-shadow: inset 0 0 24px rgba(0, 245, 255, 0.08), 0 0 24px rgba(0, 245, 255, 0.12);
+}
+
+.section-title {
+  @apply text-3xl md:text-4xl font-semibold tracking-tight;
+}
