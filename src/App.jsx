@@ -336,7 +336,7 @@ const Navigation = ({ locale }) => {
     { key: 'home', href: '/' },
     { key: 'directory', href: '/directory' },
     { key: 'guides', href: '/guides' },
-    { key: 'submit', href: '#submit' },
+    { key: 'submit', href: '/submit' },
   ]
 
   return (
@@ -353,9 +353,12 @@ const Navigation = ({ locale }) => {
       </div>
       <div className="flex items-center gap-3">
         <LanguageSwitch locale={locale} />
-        <button className="rounded-full bg-neonBlue/90 px-4 py-2 text-sm font-semibold text-black hover:bg-neonBlue">
+        <Link
+          to={buildPath('/submit', locale)}
+          className="rounded-full bg-neonBlue/90 px-4 py-2 text-sm font-semibold text-black hover:bg-neonBlue"
+        >
           {t.submitButton}
-        </button>
+        </Link>
       </div>
     </nav>
   )
@@ -524,13 +527,13 @@ const Home = ({ locale }) => {
           </Link>
         </section>
 
-        <SubmitAgent locale={locale} t={t} />
+        <SubmitAgent locale={locale} t={t} showTitle={false} />
       </main>
     </div>
   )
 }
 
-const SubmitAgent = ({ locale, t }) => {
+const SubmitAgent = ({ locale, t, showTitle = true }) => {
   const [form, setForm] = useState({ name: '', website: '', summary: '', useCase: '', assets: '' })
   const [status, setStatus] = useState('')
 
@@ -563,8 +566,12 @@ const SubmitAgent = ({ locale, t }) => {
 
   return (
     <section id="submit" className="glass-panel rounded-[28px] p-8">
-      <h2 className="text-3xl font-semibold">{t.submitTitle}</h2>
-      <p className="mt-3 max-w-2xl text-slate-300">{t.submitDesc}</p>
+      {showTitle && (
+        <>
+          <h2 className="text-3xl font-semibold">{t.submitTitle}</h2>
+          <p className="mt-3 max-w-2xl text-slate-300">{t.submitDesc}</p>
+        </>
+      )}
       <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
         <input
           className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
@@ -1089,6 +1096,27 @@ const Admin = ({ locale }) => {
   )
 }
 
+const SubmitPage = ({ locale }) => {
+  const t = content[locale] || content.en
+
+  return (
+    <div className="min-h-screen">
+      <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
+        <Navigation locale={locale} />
+        <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/30 p-8">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-neonBlue/20 blur-3xl float-slow" />
+          <div className="pointer-events-none absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-neonPink/20 blur-3xl float-fast" />
+          <h1 className="display-font text-3xl font-semibold">{t.submitTitle}</h1>
+          <p className="mt-2 text-slate-300">{t.submitDesc}</p>
+        </section>
+      </header>
+      <main className="mx-auto max-w-6xl px-6 pb-24">
+        <SubmitAgent locale={locale} t={t} showTitle={false} />
+      </main>
+    </div>
+  )
+}
+
 const RouteResolver = ({ type }) => {
   const { locale } = useParams()
   const resolvedLocale = resolveLocale(locale)
@@ -1097,6 +1125,7 @@ const RouteResolver = ({ type }) => {
   if (type === 'detail') return <AgentDetail locale={resolvedLocale} />
   if (type === 'guides') return <Guides locale={resolvedLocale} />
   if (type === 'admin') return <Admin locale={resolvedLocale} />
+  if (type === 'submit') return <SubmitPage locale={resolvedLocale} />
   return <Home locale={resolvedLocale} />
 }
 
@@ -1109,11 +1138,13 @@ export default function App() {
         <Route path="/agents/:slug" element={<RouteResolver type="detail" />} />
         <Route path="/guides" element={<RouteResolver type="guides" />} />
         <Route path="/admin" element={<RouteResolver type="admin" />} />
+        <Route path="/submit" element={<RouteResolver type="submit" />} />
         <Route path="/:locale" element={<RouteResolver type="home" />} />
         <Route path="/:locale/directory" element={<RouteResolver type="directory" />} />
         <Route path="/:locale/agents/:slug" element={<RouteResolver type="detail" />} />
         <Route path="/:locale/guides" element={<RouteResolver type="guides" />} />
         <Route path="/:locale/admin" element={<RouteResolver type="admin" />} />
+        <Route path="/:locale/submit" element={<RouteResolver type="submit" />} />
       </Routes>
     </BrowserRouter>
   )
