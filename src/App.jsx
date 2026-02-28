@@ -822,6 +822,7 @@ const Admin = ({ locale }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [authUser, setAuthUser] = useState(null)
+  const [authMode, setAuthMode] = useState('signin')
 
   const loadAdminData = async () => {
     const ok = await isAdmin()
@@ -871,6 +872,17 @@ const Admin = ({ locale }) => {
   const handleLogin = async (event) => {
     event.preventDefault()
     setStatus('')
+    if (authMode === 'signup') {
+      const { data, error } = await supabase.auth.signUp({ email, password })
+      if (error) {
+        setStatus(error.message)
+        return
+      }
+      setStatus(locale === 'en' ? 'Check your email to confirm.' : '请查收邮箱完成验证。')
+      setAuthUser(data.user)
+      return
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setStatus(error.message)
@@ -924,7 +936,26 @@ const Admin = ({ locale }) => {
                   onChange={(event) => setPassword(event.target.value)}
                 />
                 <button className="rounded-md bg-neonBlue px-4 py-2 text-sm font-semibold text-black">
-                  {locale === 'en' ? 'Sign in' : '登录'}
+                  {authMode === 'signup'
+                    ? locale === 'en'
+                      ? 'Sign up'
+                      : '注册'
+                    : locale === 'en'
+                      ? 'Sign in'
+                      : '登录'}
+                </button>
+                <button
+                  type="button"
+                  className="text-xs text-slate-300"
+                  onClick={() => setAuthMode(authMode === 'signup' ? 'signin' : 'signup')}
+                >
+                  {authMode === 'signup'
+                    ? locale === 'en'
+                      ? 'Have an account? Sign in'
+                      : '已有账号？登录'
+                    : locale === 'en'
+                      ? 'No account? Sign up'
+                      : '没有账号？注册'}
                 </button>
               </form>
             )}
