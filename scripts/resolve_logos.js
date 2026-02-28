@@ -39,21 +39,29 @@ const resolveUrl = (base, href) => {
 const run = async () => {
   for (const item of data) {
     if (item.logo_url) continue
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 12000)
     try {
-      const res = await fetch(item.website, { redirect: 'follow' })
+      const res = await fetch(item.website, { redirect: 'follow', signal: controller.signal })
       const html = await res.text()
       const logoHref = pickLogo(html)
       if (!logoHref) {
         item.logo_url = null
         item.logo_source = 'missing'
+        console.log(`No logo: ${item.name}`)
+        clearTimeout(timeout)
         continue
       }
       const resolved = resolveUrl(item.website, logoHref)
       item.logo_url = resolved
       item.logo_source = logoHref.includes('apple-touch-icon') ? 'apple-touch-icon' : 'site-icon'
+      console.log(`Logo found: ${item.name}`)
     } catch (err) {
       item.logo_url = null
       item.logo_source = 'missing'
+      console.log(`Error: ${item.name}`)
+    } finally {
+      clearTimeout(timeout)
     }
   }
 
