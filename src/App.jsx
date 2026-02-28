@@ -383,8 +383,9 @@ const AuthPanel = ({ locale }) => {
         </button>
       )}
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-3 w-80 rounded-2xl border border-white/10 bg-black/80 p-4 shadow-2xl backdrop-blur">
-          {!session && (
+        <div className="fixed inset-0 z-[999] flex items-start justify-end bg-black/40 p-6" onClick={() => setOpen(false)}>
+          <div className="relative w-80 rounded-2xl border border-white/10 bg-black/90 p-4 shadow-2xl backdrop-blur" onClick={(e) => e.stopPropagation()}>
+            {!session && (
             <form className="grid gap-3" onSubmit={handleAuth}>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -434,6 +435,7 @@ const AuthPanel = ({ locale }) => {
               </button>
             </div>
           )}
+          </div>
         </div>
       )}
     </div>
