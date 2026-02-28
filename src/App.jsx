@@ -1,4 +1,4 @@
-const LOCALE_PATHS = ['zh', 'fr']
+import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom'
 
 const content = {
   en: {
@@ -16,9 +16,9 @@ const content = {
     featured: 'Featured This Week',
     categoriesTitle: 'Categories',
     latestTitle: 'Newest Agents',
-    directoryTitle: 'Agent Directory (Template)',
+    directoryTitle: 'Agent Directory',
     directoryFilters: ['Use case', 'Pricing', 'Open-source', 'Local', 'Platform'],
-    agentDetailTitle: 'Agent Detail (Template)',
+    agentDetailTitle: 'Agent Detail',
     quickStart: 'Quick Start',
     scenarios: 'Popular Scenarios',
     guidesTitle: 'Guides',
@@ -33,9 +33,6 @@ const content = {
       assets: 'Screenshots / assets link',
     },
     detail: {
-      title: 'Cursor',
-      desc: 'An AI-first IDE for code generation, refactoring, and context collaboration.',
-      tags: ['Engineering', 'Best for: Developers', 'Platform: Desktop app'],
       blocks: ['Highlights', 'Best for', 'Integrations', 'Pricing'],
       blockDesc: 'Key points for {item}.',
       steps: ['Install and sign in', 'Pick a repository', 'Run tasks with built-in agents'],
@@ -102,36 +99,42 @@ const content = {
     ],
     directoryAgents: [
       {
+        slug: 'jasper',
         name: 'Jasper',
         tag: 'Writing',
         audience: 'Marketing teams',
         summary: 'Marketing content platform with team collaboration.',
       },
       {
+        slug: 'codeium',
         name: 'Codeium',
         tag: 'Engineering',
         audience: 'Developers',
         summary: 'Multi-editor coding assistant with generous free tier.',
       },
       {
+        slug: 'ada-support',
         name: 'Ada Support',
         tag: 'Support',
         audience: 'Support teams',
         summary: 'Enterprise support automation with knowledge base sync.',
       },
       {
+        slug: 'zapier-ai',
         name: 'Zapier AI',
         tag: 'Automation',
         audience: 'Operations',
         summary: 'Generate workflows across apps using natural language.',
       },
       {
+        slug: 'midjourney',
         name: 'Midjourney',
         tag: 'Design',
         audience: 'Creators',
         summary: 'High-fidelity image generation and style exploration.',
       },
       {
+        slug: 'llamaindex',
         name: 'LlamaIndex',
         tag: 'Research',
         audience: 'Product teams',
@@ -154,9 +157,9 @@ const content = {
     featured: '本周精选',
     categoriesTitle: '分类入口',
     latestTitle: '最新收录',
-    directoryTitle: 'Agent 目录（模板）',
+    directoryTitle: 'Agent 目录',
     directoryFilters: ['用途', '价格', '开源', '本地部署', '平台类型'],
-    agentDetailTitle: 'Agent 详情页（模板）',
+    agentDetailTitle: 'Agent 详情页',
     quickStart: '快速上手',
     scenarios: '典型场景',
     guidesTitle: '指南中心',
@@ -171,9 +174,6 @@ const content = {
       assets: '截图 / 资料链接',
     },
     detail: {
-      title: 'Cursor',
-      desc: 'AI 编程 IDE，支持代码生成、重构与上下文协作。',
-      tags: ['编程', '适合：开发者', '平台：桌面 App'],
       blocks: ['功能亮点', '适合人群', '集成方式', '成本/定价'],
       blockDesc: '这里展示 {item} 的要点内容。',
       steps: ['安装并登录', '选择代码仓库或项目', '通过内置 Agent 执行任务'],
@@ -240,36 +240,42 @@ const content = {
     ],
     directoryAgents: [
       {
+        slug: 'jasper',
         name: 'Jasper',
         tag: '写作',
         audience: '市场团队',
         summary: '营销文案与内容创作平台，支持团队协作。',
       },
       {
+        slug: 'codeium',
         name: 'Codeium',
         tag: '编程',
         audience: '开发者',
         summary: '多编辑器 AI 编程助手，免费额度友好。',
       },
       {
+        slug: 'ada-support',
         name: 'Ada Support',
         tag: '客服',
         audience: '客服团队',
         summary: '企业级客服自动化与知识库接入。',
       },
       {
+        slug: 'zapier-ai',
         name: 'Zapier AI',
         tag: '自动化',
         audience: '运营',
         summary: '用自然语言生成跨应用自动化流程。',
       },
       {
+        slug: 'midjourney',
         name: 'Midjourney',
         tag: '设计',
         audience: '内容创作者',
         summary: '高质量图像生成与风格探索。',
       },
       {
+        slug: 'llamaindex',
         name: 'LlamaIndex',
         tag: '研究',
         audience: '技术团队',
@@ -279,54 +285,73 @@ const content = {
   },
 }
 
-const resolveLocale = () => {
-  if (typeof window === 'undefined') return 'en'
-  const path = window.location.pathname
-  const segment = path.split('/')[1]
-  if (LOCALE_PATHS.includes(segment)) return segment
+const locales = Object.keys(content)
+
+const resolveLocale = (paramLocale) => {
+  if (paramLocale && locales.includes(paramLocale)) return paramLocale
   return 'en'
 }
 
-const withLocalePrefix = (path, locale) => {
-  if (!path.startsWith('#')) return path
+const buildPath = (path, locale) => {
+  if (path.startsWith('#')) {
+    return locale === 'en' ? path : `/${locale}${path}`
+  }
   if (locale === 'en') return path
   return `/${locale}${path}`
 }
 
-export default function App() {
-  const locale = resolveLocale()
+const getAgentBySlug = (locale, slug) => {
+  const t = content[locale] || content.en
+  return t.directoryAgents.find((agent) => agent.slug === slug) || t.directoryAgents[0]
+}
+
+const LanguageSwitch = ({ locale }) => (
+  <a
+    href={locale === 'en' ? '/zh' : '/'}
+    className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:text-white"
+  >
+    {locale === 'en' ? '中文' : 'EN'}
+  </a>
+)
+
+const Navigation = ({ locale }) => {
   const t = content[locale] || content.en
   const navLinks = [
-    { key: 'home', href: '#home' },
-    { key: 'directory', href: '#directory' },
+    { key: 'home', href: '/' },
+    { key: 'directory', href: '/directory' },
     { key: 'guides', href: '#guides' },
     { key: 'submit', href: '#submit' },
   ]
 
   return (
+    <nav className="mb-14 flex flex-wrap items-center justify-between gap-4 rounded-full neon-border bg-black/20 px-5 py-3 backdrop-blur">
+      <Link to={buildPath('/', locale)} className="text-lg font-bold tracking-wide">
+        BestClaw
+      </Link>
+      <div className="flex flex-wrap gap-3 text-sm text-slate-300">
+        {navLinks.map((item) => (
+          <a key={item.key} href={buildPath(item.href, locale)} className="hover:text-white">
+            {t.nav[item.key]}
+          </a>
+        ))}
+      </div>
+      <div className="flex items-center gap-3">
+        <LanguageSwitch locale={locale} />
+        <button className="rounded-full bg-neonBlue/90 px-4 py-2 text-sm font-semibold text-black hover:bg-neonBlue">
+          {t.submitButton}
+        </button>
+      </div>
+    </nav>
+  )
+}
+
+const Home = ({ locale }) => {
+  const t = content[locale] || content.en
+
+  return (
     <div className="min-h-screen">
       <header className="mx-auto max-w-6xl px-6 pb-16 pt-8 md:pt-12">
-        <nav className="mb-14 flex flex-wrap items-center justify-between gap-4 rounded-full neon-border bg-black/20 px-5 py-3 backdrop-blur">
-          <span className="text-lg font-bold tracking-wide">BestClaw</span>
-          <div className="flex flex-wrap gap-3 text-sm text-slate-300">
-            {navLinks.map((item) => (
-              <a key={item.key} href={withLocalePrefix(item.href, locale)} className="hover:text-white">
-                {t.nav[item.key]}
-              </a>
-            ))}
-          </div>
-          <div className="flex items-center gap-3">
-            <a
-              href={locale === 'en' ? '/zh' : '/'}
-              className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:text-white"
-            >
-              {locale === 'en' ? '中文' : 'EN'}
-            </a>
-            <button className="rounded-full bg-neonBlue/90 px-4 py-2 text-sm font-semibold text-black hover:bg-neonBlue">
-              {t.submitButton}
-            </button>
-          </div>
-        </nav>
+        <Navigation locale={locale} />
 
         <section className="grid gap-10 md:grid-cols-2 md:items-center" id="home">
           <div>
@@ -394,75 +419,6 @@ export default function App() {
           </div>
         </section>
 
-        <section id="directory">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <h2 className="section-title">{t.directoryTitle}</h2>
-            <div className="flex flex-wrap gap-2">
-              {t.directoryFilters.map((filter) => (
-                <span key={filter} className="rounded-full border border-neonBlue/40 bg-neonBlue/10 px-3 py-1 text-xs text-neonBlue">
-                  {filter}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {t.directoryAgents.map((agent) => (
-              <article key={agent.name} className="rounded-2xl neon-border bg-black/35 p-5 hover:-translate-y-1 hover:shadow-neon transition">
-                <p className="text-xs uppercase tracking-wider text-neonPink">{agent.tag}</p>
-                <h3 className="mt-2 text-xl font-semibold">{agent.name}</h3>
-                <p className="mt-2 text-sm text-slate-300">
-                  {locale === 'en' ? 'Best for: ' : '适合：'}
-                  {agent.audience}
-                </p>
-                <p className="mt-3 text-slate-300">{agent.summary}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section id="agent-detail" className="rounded-2xl neon-border bg-black/30 p-8">
-          <h2 className="section-title">{t.agentDetailTitle}</h2>
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <h3 className="text-2xl font-semibold">{t.detail.title}</h3>
-              <p className="mt-2 text-slate-300">{t.detail.desc}</p>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                {t.detail.tags.map((tag) => (
-                  <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-300">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {t.detail.blocks.map((item) => (
-                  <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <h4 className="font-semibold">{item}</h4>
-                    <p className="mt-2 text-sm text-slate-300">
-                      {t.detail.blockDesc.replace('{item}', item)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-              <h4 className="font-semibold">{t.quickStart}</h4>
-              <ol className="mt-3 space-y-2 text-sm text-slate-300">
-                {t.detail.steps.map((step, index) => (
-                  <li key={step}>
-                    {index + 1}. {step}
-                  </li>
-                ))}
-              </ol>
-              <h4 className="mt-6 font-semibold">{t.scenarios}</h4>
-              <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                {t.detail.useCases.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
         <section id="guides">
           <h2 className="section-title">{t.guidesTitle}</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -495,5 +451,145 @@ export default function App() {
         </section>
       </main>
     </div>
+  )
+}
+
+const Directory = ({ locale }) => {
+  const t = content[locale] || content.en
+
+  return (
+    <div className="min-h-screen">
+      <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
+        <Navigation locale={locale} />
+        <section className="rounded-2xl neon-border bg-black/30 p-8">
+          <h1 className="text-3xl font-semibold">{t.directoryTitle}</h1>
+          <p className="mt-2 text-slate-300">{locale === 'en' ? 'Browse agents by use case, pricing, and platform.' : '按用途、价格与平台筛选 Agent。'}</p>
+        </section>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 pb-24">
+        <section>
+          <div className="flex flex-wrap gap-2">
+            {t.directoryFilters.map((filter) => (
+              <span key={filter} className="rounded-full border border-neonBlue/40 bg-neonBlue/10 px-3 py-1 text-xs text-neonBlue">
+                {filter}
+              </span>
+            ))}
+          </div>
+          <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {t.directoryAgents.map((agent) => (
+              <article key={agent.name} className="rounded-2xl neon-border bg-black/35 p-5 hover:-translate-y-1 hover:shadow-neon transition">
+                <p className="text-xs uppercase tracking-wider text-neonPink">{agent.tag}</p>
+                <h3 className="mt-2 text-xl font-semibold">{agent.name}</h3>
+                <p className="mt-2 text-sm text-slate-300">
+                  {locale === 'en' ? 'Best for: ' : '适合：'}
+                  {agent.audience}
+                </p>
+                <p className="mt-3 text-slate-300">{agent.summary}</p>
+                <Link
+                  to={buildPath(`/agents/${agent.slug}`, locale)}
+                  className="mt-4 inline-flex text-sm text-neonBlue hover:text-neonBlue/80"
+                >
+                  {locale === 'en' ? 'View details →' : '查看详情 →'}
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+      </main>
+    </div>
+  )
+}
+
+const AgentDetail = ({ locale }) => {
+  const t = content[locale] || content.en
+  const { slug } = useParams()
+  const agent = getAgentBySlug(locale, slug)
+
+  return (
+    <div className="min-h-screen">
+      <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
+        <Navigation locale={locale} />
+        <section className="rounded-2xl neon-border bg-black/30 p-8">
+          <h1 className="text-3xl font-semibold">{agent.name}</h1>
+          <p className="mt-2 text-slate-300">{agent.summary}</p>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs">
+            <span className="rounded-full border border-neonBlue/40 bg-neonBlue/10 px-3 py-1 text-neonBlue">
+              {agent.tag}
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-300">
+              {locale === 'en' ? 'Best for: ' : '适合：'}
+              {agent.audience}
+            </span>
+          </div>
+        </section>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 pb-24">
+        <section className="rounded-2xl neon-border bg-black/30 p-8">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <h2 className="section-title">{t.agentDetailTitle}</h2>
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                {t.detail.blocks.map((item) => (
+                  <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <h4 className="font-semibold">{item}</h4>
+                    <p className="mt-2 text-sm text-slate-300">
+                      {t.detail.blockDesc.replace('{item}', item)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+              <h4 className="font-semibold">{t.quickStart}</h4>
+              <ol className="mt-3 space-y-2 text-sm text-slate-300">
+                {t.detail.steps.map((step, index) => (
+                  <li key={step}>
+                    {index + 1}. {step}
+                  </li>
+                ))}
+              </ol>
+              <h4 className="mt-6 font-semibold">{t.scenarios}</h4>
+              <ul className="mt-3 space-y-2 text-sm text-slate-300">
+                {t.detail.useCases.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+              <Link
+                to={buildPath('/directory', locale)}
+                className="mt-6 inline-flex text-sm text-neonBlue hover:text-neonBlue/80"
+              >
+                {locale === 'en' ? '← Back to directory' : '← 返回目录'}
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  )
+}
+
+const RouteResolver = ({ type }) => {
+  const { locale } = useParams()
+  const resolvedLocale = resolveLocale(locale)
+
+  if (type === 'directory') return <Directory locale={resolvedLocale} />
+  if (type === 'detail') return <AgentDetail locale={resolvedLocale} />
+  return <Home locale={resolvedLocale} />
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<RouteResolver type="home" />} />
+        <Route path="/directory" element={<RouteResolver type="directory" />} />
+        <Route path="/agents/:slug" element={<RouteResolver type="detail" />} />
+        <Route path="/:locale" element={<RouteResolver type="home" />} />
+        <Route path="/:locale/directory" element={<RouteResolver type="directory" />} />
+        <Route path="/:locale/agents/:slug" element={<RouteResolver type="detail" />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
