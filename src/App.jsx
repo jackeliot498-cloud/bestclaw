@@ -383,9 +383,29 @@ const AuthPanel = ({ locale }) => {
         </button>
       )}
       {open && (
-        <div className="absolute right-0 mt-3 w-72 rounded-2xl border border-white/10 bg-black/70 p-4 backdrop-blur">
+        <div className="absolute right-0 mt-3 w-80 rounded-2xl border border-white/10 bg-black/70 p-4 backdrop-blur">
           {!session && (
             <form className="grid gap-3" onSubmit={handleAuth}>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMode('signin')}
+                  className={`rounded-md px-3 py-2 text-xs ${
+                    mode === 'signin' ? 'bg-neonBlue text-black' : 'border border-white/10 text-slate-300'
+                  }`}
+                >
+                  {locale === 'en' ? 'Sign in' : '登录'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('signup')}
+                  className={`rounded-md px-3 py-2 text-xs ${
+                    mode === 'signup' ? 'bg-neonBlue text-black' : 'border border-white/10 text-slate-300'
+                  }`}
+                >
+                  {locale === 'en' ? 'Sign up' : '注册'}
+                </button>
+              </div>
               <input
                 className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm"
                 type="email"
@@ -401,20 +421,7 @@ const AuthPanel = ({ locale }) => {
                 onChange={(event) => setPassword(event.target.value)}
               />
               <button className="rounded-md bg-neonBlue px-3 py-2 text-sm font-semibold text-black">
-                {mode === 'signup' ? (locale === 'en' ? 'Sign up' : '注册') : locale === 'en' ? 'Sign in' : '登录'}
-              </button>
-              <button
-                type="button"
-                className="text-xs text-slate-300"
-                onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}
-              >
-                {mode === 'signup'
-                  ? locale === 'en'
-                    ? 'Have an account? Sign in'
-                    : '已有账号？登录'
-                  : locale === 'en'
-                    ? 'No account? Sign up'
-                    : '没有账号？注册'}
+                {mode === 'signup' ? (locale === 'en' ? 'Create account' : '创建账号') : locale === 'en' ? 'Sign in' : '登录'}
               </button>
               {status && <p className="text-xs text-slate-300">{status}</p>}
             </form>
