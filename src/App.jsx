@@ -367,10 +367,10 @@ const Home = ({ locale }) => {
           className="relative overflow-hidden rounded-[32px] border border-white/10 bg-black/30 p-10 md:p-14"
           id="home"
         >
-          <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-neonBlue/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-10 h-52 w-52 rounded-full bg-neonPink/20 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-neonBlue/20 blur-3xl float-slow" />
+          <div className="pointer-events-none absolute -bottom-20 left-10 h-52 w-52 rounded-full bg-neonPink/20 blur-3xl float-fast" />
           <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <div>
+            <div className="fade-rise">
               <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-slate-200">
                 <span className="h-2 w-2 rounded-full bg-neonGreen" />
                 {t.hero.badge}
@@ -399,7 +399,7 @@ const Home = ({ locale }) => {
                 ))}
               </div>
             </div>
-            <div className="glass-panel rounded-[28px] p-6">
+            <div className="glass-panel rounded-[28px] p-6 fade-rise">
               <p className="text-sm uppercase tracking-wider text-neonBlue">{t.featured}</p>
               <div className="mt-5 space-y-4">
                 {t.featuredAgents.map((agent) => (
@@ -418,6 +418,31 @@ const Home = ({ locale }) => {
               >
                 {locale === 'en' ? 'Browse directory →' : '进入目录 →'}
               </Link>
+            </div>
+            <div className="relative hidden lg:block">
+              <div className="hero-illustration absolute -right-10 top-10 h-72 w-72 rounded-[48px] blur-0" />
+              <svg
+                className="absolute -right-16 top-24 h-64 w-64 opacity-80"
+                viewBox="0 0 200 200"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill="rgba(92,255,233,0.3)"
+                  d="M44.8,-61.2C58.3,-52.3,69.4,-39.1,74.1,-23.8C78.8,-8.4,77,9.1,70.2,23.5C63.5,38,51.8,49.5,38.1,58.7C24.5,67.9,9,74.7,-7.4,76.6C-23.9,78.5,-47.8,75.5,-61.1,63.8C-74.4,52.2,-77,31.8,-76.5,12.8C-75.9,-6.2,-72.1,-23.7,-61.2,-35.6C-50.3,-47.4,-32.2,-53.6,-15.4,-60.4C1.4,-67.2,2.4,-74.7,44.8,-61.2Z"
+                  transform="translate(100 100)"
+                />
+              </svg>
+              <svg
+                className="absolute -right-4 top-56 h-40 w-40 opacity-70"
+                viewBox="0 0 200 200"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill="rgba(255,142,200,0.35)"
+                  d="M36.8,-47.6C50.1,-42.6,65.7,-34.6,72,-22.1C78.3,-9.6,75.2,7.4,67.4,22.1C59.7,36.8,47.3,49.1,33.7,57.7C20.1,66.3,5.3,71.3,-8.4,73.5C-22.1,75.6,-44.2,74.9,-55.4,64.2C-66.6,53.5,-67,32.8,-66.4,14.2C-65.8,-4.3,-64.2,-20.8,-55.8,-32.5C-47.4,-44.2,-32.3,-51,-18.1,-57.1C-3.9,-63.1,9.4,-68.4,36.8,-47.6Z"
+                  transform="translate(100 100)"
+                />
+              </svg>
             </div>
           </div>
         </section>

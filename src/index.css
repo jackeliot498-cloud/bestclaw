@@ -43,6 +43,45 @@ body::before {
   backdrop-filter: blur(14px);
 }
 
+.hero-illustration {
+  background: radial-gradient(circle at 30% 30%, rgba(92, 255, 233, 0.35), transparent 60%),
+    radial-gradient(circle at 70% 20%, rgba(255, 142, 200, 0.35), transparent 55%),
+    radial-gradient(circle at 60% 70%, rgba(132, 255, 196, 0.28), transparent 60%);
+}
+
+.float-slow {
+  animation: float 10s ease-in-out infinite;
+}
+
+.float-fast {
+  animation: float 6s ease-in-out infinite;
+}
+
+.fade-rise {
+  animation: fadeRise 0.9s ease forwards;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+@keyframes fadeRise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 .section-title {
   @apply text-3xl md:text-4xl font-semibold tracking-tight;
 }
