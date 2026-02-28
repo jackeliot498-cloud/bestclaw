@@ -4,6 +4,7 @@ import { fetchAgents, fetchAgentDetail } from './lib/agents'
 import { fetchGuides } from './lib/guides'
 import { fetchReviewsSummary, submitReview } from './lib/reviews'
 import { supabase } from './lib/supabase'
+import { isAdmin, fetchSubmissions, updateSubmissionStatus, fetchGuidesAdmin, updateGuideStatus } from './lib/admin'
 
 const content = {
   en: {
@@ -812,6 +813,137 @@ const AgentDetail = ({ locale }) => {
   )
 }
 
+const Admin = ({ locale }) => {
+  const [allowed, setAllowed] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [submissions, setSubmissions] = useState([])
+  const [guides, setGuides] = useState([])
+  const [status, setStatus] = useState('')
+
+  useEffect(() => {
+    let alive = true
+    isAdmin()
+      .then(async (ok) => {
+        if (!alive) return
+        setAllowed(ok)
+        if (ok) {
+          const [subs, gds] = await Promise.all([fetchSubmissions(), fetchGuidesAdmin()])
+          if (alive) {
+            setSubmissions(subs)
+            setGuides(gds)
+          }
+        }
+      })
+      .catch(() => null)
+      .finally(() => {
+        if (alive) setLoading(false)
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const handleStatus = async (id, nextStatus) => {
+    try {
+      await updateSubmissionStatus(id, nextStatus)
+      setSubmissions((prev) => prev.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)))
+    } catch (err) {
+      setStatus(locale === 'en' ? 'Update failed' : '更新失败')
+    }
+  }
+
+  const handleGuide = async (id, nextStatus) => {
+    try {
+      await updateGuideStatus(id, nextStatus)
+      setGuides((prev) => prev.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)))
+    } catch (err) {
+      setStatus(locale === 'en' ? 'Update failed' : '更新失败')
+    }
+  }
+
+  return (
+    <div className="min-h-screen">
+      <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
+        <Navigation locale={locale} />
+        <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/30 p-8">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-neonBlue/20 blur-3xl float-slow" />
+          <div className="pointer-events-none absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-neonPink/20 blur-3xl float-fast" />
+          <h1 className="display-font text-3xl font-semibold">{locale === 'en' ? 'Admin Console' : '内容治理后台'}</h1>
+          <p className="mt-2 text-slate-300">
+            {locale === 'en' ? 'Review submissions and manage guide status.' : '审核提交、管理指南发布状态。'}
+          </p>
+        </section>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 pb-24">
+        {loading && <p className="text-slate-300">Loading...</p>}
+        {!loading && !allowed && (
+          <div className="glass-panel rounded-2xl p-6">
+            {locale === 'en' ? 'You are not authorized.' : '你没有权限访问此页面。'}
+          </div>
+        )}
+        {!loading && allowed && (
+          <div className="grid gap-8">
+            <section className="glass-panel rounded-2xl p-6">
+              <h2 className="text-xl font-semibold">{locale === 'en' ? 'Submissions' : '提交审核'}</h2>
+              <div className="mt-4 space-y-4">
+                {submissions.map((item) => (
+                  <div key={item.id} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="font-semibold">{item.name}</p>
+                        <p className="text-xs text-slate-400">{item.website}</p>
+                      </div>
+                      <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
+                        {item.status}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-300">{item.summary}</p>
+                    <div className="mt-3 flex gap-2">
+                      <button className="rounded-md bg-neonGreen px-3 py-1 text-xs text-black" onClick={() => handleStatus(item.id, 'approved')}>
+                        {locale === 'en' ? 'Approve' : '通过'}
+                      </button>
+                      <button className="rounded-md border border-neonPink/40 px-3 py-1 text-xs text-neonPink" onClick={() => handleStatus(item.id, 'rejected')}>
+                        {locale === 'en' ? 'Reject' : '拒绝'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="glass-panel rounded-2xl p-6">
+              <h2 className="text-xl font-semibold">{locale === 'en' ? 'Guides' : '指南管理'}</h2>
+              <div className="mt-4 space-y-4">
+                {guides.map((item) => (
+                  <div key={item.id} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-semibold">{item.guide_translations?.[0]?.title || item.slug}</p>
+                      <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
+                        {item.status}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <button className="rounded-md bg-neonGreen px-3 py-1 text-xs text-black" onClick={() => handleGuide(item.id, 'published')}>
+                        {locale === 'en' ? 'Publish' : '发布'}
+                      </button>
+                      <button className="rounded-md border border-neonPink/40 px-3 py-1 text-xs text-neonPink" onClick={() => handleGuide(item.id, 'draft')}>
+                        {locale === 'en' ? 'Unpublish' : '下线'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            {status && <p className="text-sm text-slate-300">{status}</p>}
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
 const RouteResolver = ({ type }) => {
   const { locale } = useParams()
   const resolvedLocale = resolveLocale(locale)
@@ -819,6 +951,7 @@ const RouteResolver = ({ type }) => {
   if (type === 'directory') return <Directory locale={resolvedLocale} />
   if (type === 'detail') return <AgentDetail locale={resolvedLocale} />
   if (type === 'guides') return <Guides locale={resolvedLocale} />
+  if (type === 'admin') return <Admin locale={resolvedLocale} />
   return <Home locale={resolvedLocale} />
 }
 
@@ -830,10 +963,12 @@ export default function App() {
         <Route path="/directory" element={<RouteResolver type="directory" />} />
         <Route path="/agents/:slug" element={<RouteResolver type="detail" />} />
         <Route path="/guides" element={<RouteResolver type="guides" />} />
+        <Route path="/admin" element={<RouteResolver type="admin" />} />
         <Route path="/:locale" element={<RouteResolver type="home" />} />
         <Route path="/:locale/directory" element={<RouteResolver type="directory" />} />
         <Route path="/:locale/agents/:slug" element={<RouteResolver type="detail" />} />
         <Route path="/:locale/guides" element={<RouteResolver type="guides" />} />
+        <Route path="/:locale/admin" element={<RouteResolver type="admin" />} />
       </Routes>
     </BrowserRouter>
   )
