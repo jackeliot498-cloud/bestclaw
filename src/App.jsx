@@ -4,7 +4,7 @@ import { fetchAgents, fetchAgentDetail } from './lib/agents'
 import { fetchGuides } from './lib/guides'
 import { fetchReviewsSummary, submitReview } from './lib/reviews'
 import { supabase } from './lib/supabase'
-import { isAdmin, fetchSubmissions, updateSubmissionStatus, fetchGuidesAdmin, updateGuideStatus } from './lib/admin'
+import { isAdmin, fetchSubmissions, updateSubmissionStatus, fetchGuidesAdmin, updateGuideStatus, createAgentFromSubmission } from './lib/admin'
 
 const content = {
   en: {
@@ -1030,6 +1030,16 @@ const Admin = ({ locale }) => {
     }
   }
 
+  const handlePublish = async (submission) => {
+    try {
+      await createAgentFromSubmission(submission)
+      await updateSubmissionStatus(submission.id, 'approved')
+      setSubmissions((prev) => prev.map((item) => (item.id === submission.id ? { ...item, status: 'approved' } : item)))
+    } catch (err) {
+      setStatus(locale === 'en' ? 'Publish failed' : '发布失败')
+    }
+  }
+
   const handleGuide = async (id, nextStatus) => {
     try {
       await updateGuideStatus(id, nextStatus)
@@ -1154,9 +1164,22 @@ const Admin = ({ locale }) => {
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-slate-300">{item.summary}</p>
-                    <div className="mt-3 flex gap-2">
-                      <button className="rounded-md bg-neonGreen px-3 py-1 text-xs text-black" onClick={() => handleStatus(item.id, 'approved')}>
-                        {locale === 'en' ? 'Approve' : '通过'}
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-400">
+                      <span>{locale === 'en' ? 'Category:' : '分类:'} {item.category || '-'}</span>
+                      <span>{locale === 'en' ? 'Pricing:' : '定价:'} {item.pricing || '-'}</span>
+                      <span>{locale === 'en' ? 'Open source:' : '开源:'} {item.is_open_source ? 'Yes' : 'No'}</span>
+                      <span>{locale === 'en' ? 'Local:' : '本地:'} {item.is_local ? 'Yes' : 'No'}</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-400">
+                      <span>{locale === 'en' ? 'Logo:' : 'Logo:'} {item.logo_url || '-'}</span>
+                      <span>{locale === 'en' ? 'Contact:' : '联系:'} {item.contact_email || '-'}</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button className="rounded-md bg-neonGreen px-3 py-1 text-xs text-black" onClick={() => handlePublish(item)}>
+                        {locale === 'en' ? 'Approve & Publish' : '通过并入库'}
+                      </button>
+                      <button className="rounded-md border border-white/10 px-3 py-1 text-xs text-slate-200" onClick={() => handleStatus(item.id, 'approved')}>
+                        {locale === 'en' ? 'Approve only' : '仅通过'}
                       </button>
                       <button className="rounded-md border border-neonPink/40 px-3 py-1 text-xs text-neonPink" onClick={() => handleStatus(item.id, 'rejected')}>
                         {locale === 'en' ? 'Reject' : '拒绝'}
