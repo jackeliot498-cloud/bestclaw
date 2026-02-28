@@ -319,7 +319,7 @@ const Navigation = ({ locale }) => {
   const navLinks = [
     { key: 'home', href: '/' },
     { key: 'directory', href: '/directory' },
-    { key: 'guides', href: '#guides' },
+    { key: 'guides', href: '/guides' },
     { key: 'submit', href: '#submit' },
   ]
 
@@ -430,6 +430,12 @@ const Home = ({ locale }) => {
               </article>
             ))}
           </div>
+          <Link
+            to={buildPath('/guides', locale)}
+            className="mt-6 inline-flex text-sm text-neonBlue hover:text-neonBlue/80"
+          >
+            {locale === 'en' ? 'Explore all guides →' : '查看全部指南 →'}
+          </Link>
         </section>
 
         <section id="submit" className="rounded-2xl neon-border bg-gradient-to-r from-cyan-500/15 via-fuchsia-500/10 to-emerald-500/15 p-8">
@@ -448,6 +454,41 @@ const Home = ({ locale }) => {
               {t.submitButton}
             </button>
           </form>
+        </section>
+      </main>
+    </div>
+  )
+}
+
+const Guides = ({ locale }) => {
+  const t = content[locale] || content.en
+
+  return (
+    <div className="min-h-screen">
+      <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
+        <Navigation locale={locale} />
+        <section className="rounded-2xl neon-border bg-black/30 p-8">
+          <h1 className="text-3xl font-semibold">{t.guidesTitle}</h1>
+          <p className="mt-2 text-slate-300">
+            {locale === 'en'
+              ? 'Playbooks, comparisons, and onboarding guides for every agent workflow.'
+              : '覆盖新手入门、场景玩法与对比评测的使用指南。'}
+          </p>
+        </section>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 pb-24">
+        <section className="grid gap-4 md:grid-cols-3">
+          {t.guides.map((guide) => (
+            <article key={guide.title} className="rounded-xl border border-white/10 bg-white/5 p-5">
+              <p className="text-xs uppercase tracking-wider text-neonGreen">{guide.read}</p>
+              <h3 className="mt-2 text-lg font-semibold">{guide.title}</h3>
+              <p className="mt-2 text-sm text-slate-300">{guide.desc}</p>
+              <button className="mt-4 inline-flex text-sm text-neonBlue hover:text-neonBlue/80">
+                {locale === 'en' ? 'Read guide →' : '阅读指南 →'}
+              </button>
+            </article>
+          ))}
         </section>
       </main>
     </div>
@@ -576,6 +617,7 @@ const RouteResolver = ({ type }) => {
 
   if (type === 'directory') return <Directory locale={resolvedLocale} />
   if (type === 'detail') return <AgentDetail locale={resolvedLocale} />
+  if (type === 'guides') return <Guides locale={resolvedLocale} />
   return <Home locale={resolvedLocale} />
 }
 
@@ -586,9 +628,11 @@ export default function App() {
         <Route path="/" element={<RouteResolver type="home" />} />
         <Route path="/directory" element={<RouteResolver type="directory" />} />
         <Route path="/agents/:slug" element={<RouteResolver type="detail" />} />
+        <Route path="/guides" element={<RouteResolver type="guides" />} />
         <Route path="/:locale" element={<RouteResolver type="home" />} />
         <Route path="/:locale/directory" element={<RouteResolver type="directory" />} />
         <Route path="/:locale/agents/:slug" element={<RouteResolver type="detail" />} />
+        <Route path="/:locale/guides" element={<RouteResolver type="guides" />} />
       </Routes>
     </BrowserRouter>
   )
