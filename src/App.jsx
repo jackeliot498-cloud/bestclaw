@@ -819,21 +819,27 @@ const Admin = ({ locale }) => {
   const [submissions, setSubmissions] = useState([])
   const [guides, setGuides] = useState([])
   const [status, setStatus] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authUser, setAuthUser] = useState(null)
+
+  const loadAdminData = async () => {
+    const ok = await isAdmin()
+    setAllowed(ok)
+    if (ok) {
+      const [subs, gds] = await Promise.all([fetchSubmissions(), fetchGuidesAdmin()])
+      setSubmissions(subs)
+      setGuides(gds)
+    }
+  }
 
   useEffect(() => {
     let alive = true
-    isAdmin()
-      .then(async (ok) => {
-        if (!alive) return
-        setAllowed(ok)
-        if (ok) {
-          const [subs, gds] = await Promise.all([fetchSubmissions(), fetchGuidesAdmin()])
-          if (alive) {
-            setSubmissions(subs)
-            setGuides(gds)
-          }
-        }
-      })
+    supabase.auth.getSession().then(({ data }) => {
+      if (alive) setAuthUser(data?.session?.user || null)
+    })
+
+    loadAdminData()
       .catch(() => null)
       .finally(() => {
         if (alive) setLoading(false)
@@ -862,6 +868,24 @@ const Admin = ({ locale }) => {
     }
   }
 
+  const handleLogin = async (event) => {
+    event.preventDefault()
+    setStatus('')
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      setStatus(error.message)
+      return
+    }
+    setAuthUser(data.user)
+    await loadAdminData()
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setAuthUser(null)
+    setAllowed(false)
+  }
+
   return (
     <div className="min-h-screen">
       <header className="mx-auto max-w-6xl px-6 pb-12 pt-8 md:pt-12">
@@ -880,7 +904,36 @@ const Admin = ({ locale }) => {
         {loading && <p className="text-slate-300">Loading...</p>}
         {!loading && !allowed && (
           <div className="glass-panel rounded-2xl p-6">
-            {locale === 'en' ? 'You are not authorized.' : '你没有权限访问此页面。'}
+            <p className="text-slate-300">
+              {locale === 'en' ? 'You are not authorized.' : '你没有权限访问此页面。'}
+            </p>
+            {!authUser && (
+              <form className="mt-4 grid gap-3" onSubmit={handleLogin}>
+                <input
+                  className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                  type="email"
+                  placeholder={locale === 'en' ? 'Email' : '邮箱'}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+                <input
+                  className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                  type="password"
+                  placeholder={locale === 'en' ? 'Password' : '密码'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+                <button className="rounded-md bg-neonBlue px-4 py-2 text-sm font-semibold text-black">
+                  {locale === 'en' ? 'Sign in' : '登录'}
+                </button>
+              </form>
+            )}
+            {authUser && (
+              <button className="mt-4 rounded-md border border-white/10 px-4 py-2 text-sm" onClick={handleLogout}>
+                {locale === 'en' ? 'Sign out' : '退出登录'}
+              </button>
+            )}
+            {status && <p className="mt-3 text-xs text-slate-300">{status}</p>}
           </div>
         )}
         {!loading && allowed && (
