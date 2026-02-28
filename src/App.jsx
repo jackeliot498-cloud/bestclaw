@@ -429,6 +429,18 @@ const AuthPanel = ({ locale }) => {
               <button className="rounded-md bg-neonBlue px-3 py-2 text-sm font-semibold text-black">
                 {mode === 'signup' ? (locale === 'en' ? 'Create account' : '创建账号') : locale === 'en' ? 'Sign in' : '登录'}
               </button>
+              <div className="relative my-1 flex items-center">
+                <div className="flex-grow border-t border-white/10" />
+                <span className="mx-2 text-[10px] uppercase tracking-[0.3em] text-slate-500">Or</span>
+                <div className="flex-grow border-t border-white/10" />
+              </div>
+              <button
+                type="button"
+                className="rounded-md border border-white/10 px-3 py-2 text-sm text-slate-200 hover:text-white"
+                onClick={() => supabase.auth.signInWithOAuth({ provider: 'google' })}
+              >
+                {locale === 'en' ? 'Continue with Google' : '使用 Google 登录'}
+              </button>
               {status && <p className="text-xs text-slate-300">{status}</p>}
             </form>
           )}
