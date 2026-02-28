@@ -1,4 +1,7 @@
 import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { fetchAgents, fetchAgentDetail } from './lib/agents'
+import { fetchGuides } from './lib/guides'
 
 const content = {
   en: {
@@ -357,6 +360,29 @@ const Navigation = ({ locale }) => {
 
 const Home = ({ locale }) => {
   const t = content[locale] || content.en
+  const [agents, setAgents] = useState(t.directoryAgents)
+  const [guides, setGuides] = useState(t.guides)
+
+  useEffect(() => {
+    let alive = true
+    fetchAgents({ locale, limit: 12 })
+      .then((data) => {
+        if (alive && data.length) setAgents(data)
+      })
+      .catch(() => null)
+
+    fetchGuides({ locale, limit: 6 })
+      .then((data) => {
+        if (alive && data.length) setGuides(data)
+      })
+      .catch(() => null)
+
+    return () => {
+      alive = false
+    }
+  }, [locale])
+
+  const latestAgents = useMemo(() => agents.slice(0, 3), [agents])
 
   return (
     <div className="min-h-screen">
@@ -466,9 +492,9 @@ const Home = ({ locale }) => {
         <section id="latest">
           <h2 className="section-title">{t.latestTitle}</h2>
           <div className="mt-6 grid gap-5 md:grid-cols-3">
-            {t.latestAgents.map((agent) => (
+            {latestAgents.map((agent) => (
               <article key={agent.name} className="glass-panel rounded-2xl p-5">
-                <p className="text-xs uppercase tracking-wider text-neonPink">{agent.tag}</p>
+                <p className="text-xs uppercase tracking-wider text-neonPink">{agent.tag || (locale === 'en' ? 'Agent' : '智能体')}</p>
                 <h3 className="mt-2 text-xl font-semibold">{agent.name}</h3>
                 <p className="mt-3 text-slate-300">{agent.summary}</p>
               </article>
@@ -479,7 +505,7 @@ const Home = ({ locale }) => {
         <section id="guides">
           <h2 className="section-title">{t.guidesTitle}</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {t.guides.map((guide) => (
+            {guides.map((guide) => (
               <article key={guide.title} className="glass-panel rounded-2xl p-5">
                 <p className="text-xs uppercase tracking-wider text-neonGreen">{guide.read}</p>
                 <h3 className="mt-2 text-lg font-semibold">{guide.title}</h3>
@@ -519,6 +545,19 @@ const Home = ({ locale }) => {
 
 const Guides = ({ locale }) => {
   const t = content[locale] || content.en
+  const [guides, setGuides] = useState(t.guides)
+
+  useEffect(() => {
+    let alive = true
+    fetchGuides({ locale, limit: 12 })
+      .then((data) => {
+        if (alive && data.length) setGuides(data)
+      })
+      .catch(() => null)
+    return () => {
+      alive = false
+    }
+  }, [locale])
 
   return (
     <div className="min-h-screen">
@@ -538,7 +577,7 @@ const Guides = ({ locale }) => {
 
       <main className="mx-auto max-w-6xl px-6 pb-24">
         <section className="grid gap-4 md:grid-cols-3">
-          {t.guides.map((guide) => (
+          {guides.map((guide) => (
             <article key={guide.title} className="glass-panel rounded-2xl p-5">
               <p className="text-xs uppercase tracking-wider text-neonGreen">{guide.read}</p>
               <h3 className="mt-2 text-lg font-semibold">{guide.title}</h3>
@@ -556,6 +595,20 @@ const Guides = ({ locale }) => {
 
 const Directory = ({ locale }) => {
   const t = content[locale] || content.en
+  const [agents, setAgents] = useState(t.directoryAgents)
+
+  useEffect(() => {
+    let alive = true
+    fetchAgents({ locale, limit: 60 })
+      .then((data) => {
+        if (alive && data.length) setAgents(data)
+      })
+      .catch(() => null)
+
+    return () => {
+      alive = false
+    }
+  }, [locale])
 
   return (
     <div className="min-h-screen">
@@ -579,13 +632,13 @@ const Directory = ({ locale }) => {
             ))}
           </div>
           <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {t.directoryAgents.map((agent) => (
+            {agents.map((agent) => (
               <article key={agent.name} className="glass-panel rounded-2xl p-5 hover:-translate-y-1 hover:shadow-neon transition">
-                <p className="text-xs uppercase tracking-wider text-neonPink">{agent.tag}</p>
+                <p className="text-xs uppercase tracking-wider text-neonPink">{agent.tag || (locale === 'en' ? 'Agent' : '智能体')}</p>
                 <h3 className="mt-2 text-xl font-semibold">{agent.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">
                   {locale === 'en' ? 'Best for: ' : '适合：'}
-                  {agent.audience}
+                  {agent.audience || (locale === 'en' ? 'Teams' : '团队')}
                 </p>
                 <p className="mt-3 text-slate-300">{agent.summary}</p>
                 <Link
@@ -606,7 +659,20 @@ const Directory = ({ locale }) => {
 const AgentDetail = ({ locale }) => {
   const t = content[locale] || content.en
   const { slug } = useParams()
-  const agent = getAgentBySlug(locale, slug)
+  const [agent, setAgent] = useState(getAgentBySlug(locale, slug))
+
+  useEffect(() => {
+    let alive = true
+    fetchAgentDetail({ slug, locale })
+      .then((data) => {
+        if (alive && data) setAgent(data)
+      })
+      .catch(() => null)
+
+    return () => {
+      alive = false
+    }
+  }, [slug, locale])
 
   return (
     <div className="min-h-screen">
@@ -619,7 +685,7 @@ const AgentDetail = ({ locale }) => {
           <p className="mt-2 text-slate-300">{agent.summary}</p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             <span className="rounded-full border border-neonBlue/40 bg-neonBlue/10 px-3 py-1 text-neonBlue">
-              {agent.tag}
+              {agent.tag || (locale === 'en' ? 'Agent' : '智能体')}
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-300">
               {locale === 'en' ? 'Best for: ' : '适合：'}
@@ -648,16 +714,16 @@ const AgentDetail = ({ locale }) => {
             <div className="rounded-xl border border-white/10 bg-white/5 p-5">
               <h4 className="font-semibold">{t.quickStart}</h4>
               <ol className="mt-3 space-y-2 text-sm text-slate-300">
-                {t.detail.steps.map((step, index) => (
-                  <li key={step}>
+                {(agent.guideSteps?.length ? agent.guideSteps : t.detail.steps).map((step, index) => (
+                  <li key={`${step}-${index}`}>
                     {index + 1}. {step}
                   </li>
                 ))}
               </ol>
               <h4 className="mt-6 font-semibold">{t.scenarios}</h4>
               <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                {t.detail.useCases.map((item) => (
-                  <li key={item}>• {item}</li>
+                {(agent.useCases?.length ? agent.useCases : t.detail.useCases).map((item, index) => (
+                  <li key={`${item}-${index}`}>• {item}</li>
                 ))}
               </ul>
               <Link

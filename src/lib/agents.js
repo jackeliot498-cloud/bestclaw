@@ -12,6 +12,7 @@ export const fetchAgents = async ({ locale = 'en', limit = 30 } = {}) => {
 
   return data.map((agent) => {
     const translation = agent.agent_translations.find((item) => item.locale === locale) || agent.agent_translations[0]
+    const firstCategory = agent.agent_categories?.[0]?.categories?.category_translations?.find((item) => item.locale === locale)
     return {
       id: agent.id,
       slug: agent.slug,
@@ -21,6 +22,8 @@ export const fetchAgents = async ({ locale = 'en', limit = 30 } = {}) => {
       isLocal: agent.is_local,
       name: translation?.name,
       summary: translation?.summary,
+      tag: firstCategory?.name,
+      audience: locale === 'en' ? 'Teams' : '团队',
     }
   })
 }
